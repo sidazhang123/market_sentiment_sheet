@@ -20,7 +20,7 @@ def _red_green_blue(data, ws, append_at, significance_threshold=2300):
         fill[1]=red
     elif data[2] > significance_threshold:
         fill[2]=green
-    if type(data[-2]) is int:
+    if type(data[-2]) is int and data[-2]>0:
         fill[len(data)-2]=blue
     for col, c in enumerate(data):
         if col == 0:
