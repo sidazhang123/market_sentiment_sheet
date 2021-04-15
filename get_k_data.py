@@ -20,8 +20,8 @@ class get_k_data():
         self.trade_cal = trade_cal[trade_cal['is_open'] == 1]['cal_date'].to_list()
         if self.trade_cal[-1] == self.today:
             # 4点前没数据
-            if datetime.now() < datetime.strptime(self.today + '16:00', '%Y%m%d%H:%M'):
-                raise Exception('{} 还未到4点'.format(datetime.now().strftime('%H:%M')))
+            # if datetime.now() < datetime.strptime(self.today + '16:00', '%Y%m%d%H:%M'):
+            #     raise Exception('{} 还未到4点'.format(datetime.now().strftime('%H:%M')))
             self._get_stock_list()
             return True
         return False
@@ -56,7 +56,7 @@ class get_k_data():
         limit_d = limit_d.loc[pd.to_datetime(limit_d['list_date'], format='%Y%m%d') < self.month_ago]
         # 最高涨停收盘没有，炸板数(没封住都叫炸板)
         return len(df.loc[df['pct_chg'] > 0]), len(df.loc[df['pct_chg'] < 0]), len(
-            df.loc[round(df['pre_close']*1.1,2)>df['close']]), len(limit_d)
+            df.loc[(round(df['pre_close'] * 1.1, 2) == df['high']) & (df['close'] < df['high'])]), len(limit_d)
 
     def get_last_b_date(self, date_str) -> str:
         for i, d in enumerate(self.trade_cal):
