@@ -6,14 +6,12 @@ import pandas as pd
 class get_k_data():
     def __init__(self, token):
         self.today = time.strftime("%Y%m%d", time.localtime(time.time()))
-        # self.today='20210413'
+        # self.today='20210414'
         self.month_ago = datetime.today() - timedelta(days=31)
         self.token = token
         ts.set_token(self.token)
         self.pro = ts.pro_api()
         self.df = (None, '1970-01-01')
-        # 最后没封住视为炸板
-        self.boom_pct = 9.9
 
     # 检查是否开盘，交易日是否在4点后
     def validate(self) -> bool:
@@ -43,7 +41,7 @@ class get_k_data():
         df = self.df[0]
         # 涨停，ret整个df算连板
         limit_u = df.loc[
-            (df['pct_chg'] >= 9.9) & ((df['ts_code'].str.startswith('60')) | (df['ts_code'].str.startswith('0')))]
+            (round(df['pre_close']*1.1,2)==df['close']) & ((df['ts_code'].str.startswith('60')) | (df['ts_code'].str.startswith('0')))]
         # 1个月内新ipo不算
         limit_u = pd.merge(self.stock_list, limit_u, on='ts_code')
         return limit_u.loc[pd.to_datetime(limit_u['list_date'], format='%Y%m%d') < self.month_ago]
@@ -53,12 +51,12 @@ class get_k_data():
         # 跌停，ret当日跌停数
         df = self.df[0]
         limit_d = df.loc[
-            (df['pct_chg'] <= -9.9) & ((df['ts_code'].str.startswith('60')) | (df['ts_code'].str.startswith('0')))]
+            (round(df['pre_close']*0.9,2)==df['close']) & ((df['ts_code'].str.startswith('60')) | (df['ts_code'].str.startswith('0')))]
         limit_d = pd.merge(self.stock_list, limit_d, on='ts_code')
         limit_d = limit_d.loc[pd.to_datetime(limit_d['list_date'], format='%Y%m%d') < self.month_ago]
-        # 最高涨停收盘没有，炸板数
+        # 最高涨停收盘没有，炸板数(没封住都叫炸板)
         return len(df.loc[df['pct_chg'] > 0]), len(df.loc[df['pct_chg'] < 0]), len(
-            df.loc[(df['high'] / df['pre_close'] - 1 >= 9.9/100) & (df['pct_chg'] < self.boom_pct)]), len(limit_d)
+            df.loc[round(df['pre_close']*1.1,2)>df['close']]), len(limit_d)
 
     def get_last_b_date(self, date_str) -> str:
         for i, d in enumerate(self.trade_cal):
