@@ -20,8 +20,8 @@ class get_k_data():
         self.trade_cal = trade_cal[trade_cal['is_open'] == 1]['cal_date'].to_list()
         if self.trade_cal[-1] == self.today:
             # 4点前没数据
-            # if datetime.now() < datetime.strptime(self.today + '16:00', '%Y%m%d%H:%M'):
-            #     raise Exception('{} 还未到4点'.format(datetime.now().strftime('%H:%M')))
+            if datetime.now() < datetime.strptime(self.today + '16:00', '%Y%m%d%H:%M'):
+                raise Exception('{} 还未到4点'.format(datetime.now().strftime('%H:%M')))
             self._get_stock_list()
             return True
         return False
