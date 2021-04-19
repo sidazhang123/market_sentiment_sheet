@@ -14,7 +14,9 @@ def run():
     # 注册基本款即可，基础积分每分钟内最多调取500次
     tushare_token = ''
     data = get_k_data(tushare_token)
-    if not data.validate(): return
+    if not data.validate():
+        write(data.today, info=None)
+        return
     # 当日涨停df
     limit_u = data.get_limit(trade_date=data.today)
     # print(limit_u)
